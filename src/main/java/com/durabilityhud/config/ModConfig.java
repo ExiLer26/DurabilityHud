@@ -5,7 +5,9 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig.Type;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ModConfig {
@@ -16,6 +18,14 @@ public class ModConfig {
     public static final ForgeConfigSpec.IntValue HUD_Y;
     public static final ForgeConfigSpec.DoubleValue HUD_SCALE;
     public static final ForgeConfigSpec.BooleanValue ENABLED;
+    
+    // Pinned Blocks
+    public static final ForgeConfigSpec.BooleanValue PINNED_BLOCKS_ENABLED;
+    public static final ForgeConfigSpec.IntValue PINNED_BLOCKS_X;
+    public static final ForgeConfigSpec.IntValue PINNED_BLOCKS_Y;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> PINNED_BLOCKS_LIST;
+    
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> ITEM_ORDER;
     
     public static final ForgeConfigSpec.BooleanValue SHOW_BLOCKS;
     public static final ForgeConfigSpec.BooleanValue SHOW_SWORD;
@@ -34,7 +44,9 @@ public class ModConfig {
     public static final ForgeConfigSpec.BooleanValue SHOW_TRIDENT;
     public static final ForgeConfigSpec.BooleanValue SHOW_FISHING_ROD;
     public static final ForgeConfigSpec.BooleanValue SHOW_SHEARS;
-    
+    public static ForgeConfigSpec.ConfigValue<List<Integer>> ITEM_POS_X;
+    public static ForgeConfigSpec.ConfigValue<List<Integer>> ITEM_POS_Y;
+
     static {
         BUILDER.push("general");
         
@@ -55,7 +67,43 @@ public class ModConfig {
             .defineInRange("hud_scale", 1.0, 0.1, 5.0);
         
         BUILDER.pop();
+        BUILDER.push("pinned_blocks");
+        
+        PINNED_BLOCKS_ENABLED = BUILDER
+            .comment("Sabit blokları göster/gizle")
+            .define("pinned_blocks_enabled", true);
+            
+        PINNED_BLOCKS_X = BUILDER
+            .comment("Sabit bloklar X pozisyonu")
+            .defineInRange("pinned_blocks_x", 10, 0, 10000);
+            
+        PINNED_BLOCKS_Y = BUILDER
+            .comment("Sabit bloklar Y pozisyonu")
+            .defineInRange("pinned_blocks_y", 100, 0, 10000);
+            
+        PINNED_BLOCKS_LIST = BUILDER
+            .comment("Sabit olarak gösterilecek bloklar (örn: minecraft:dirt, minecraft:stone)")
+            .defineList("pinned_blocks_list", new ArrayList<String>(), obj -> obj instanceof String);
+        
+        BUILDER.pop();
         BUILDER.push("items");
+        
+        ITEM_ORDER = BUILDER
+            .comment("Item gösterim sırası")
+            .defineList("item_order", Arrays.asList(
+                "blocks", "sword", "pickaxe", "axe", "shovel", "hoe",
+                "helmet", "chestplate", "leggings", "boots", "shield",
+                "elytra", "bow", "crossbow", "trident", "fishing_rod", "shears"
+            ), obj -> obj instanceof String);
+            
+            ITEM_POS_X = BUILDER
+        .comment("Her dayanıklılık item'i için X pozisyonları")
+        .define("item_pos_x", new ArrayList<>());
+
+          ITEM_POS_Y = BUILDER
+        .comment("Her dayanıklılık item'i için Y pozisyonları")
+        .define("item_pos_y", new ArrayList<>());
+
         
         SHOW_BLOCKS = BUILDER
             .comment("Tüm blokları gruplandır ve toplam sayısını göster")

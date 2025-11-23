@@ -122,9 +122,13 @@ Adding Libraries to Inheritance
 Reading Input: /home/runner/workspace/build/libs/durabilityhud-1.0.0.jar
 Adding input to inheritance map
 Processing entries
+Conflicting propagated mapping for com/durabilityhud/client/ConfigScreen$DraggableButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
 Conflicting propagated mapping for com/durabilityhud/client/ConfigScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
 Conflicting propagated mapping for com/durabilityhud/client/ConfigScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
 Conflicting propagated mapping for com/durabilityhud/client/ConfigScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/durabilityhud/client/ConfigScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/durabilityhud/client/ConfigScreen/mouseDragged(DDIDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseDragged(DDIDD)Z: mouseDragged -> m_7979_
+Conflicting propagated mapping for com/durabilityhud/client/ConfigScreen/mouseReleased(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseReleased(DDI)Z: mouseReleased -> m_6348_
 Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
 Conflicting propagated mapping for net/minecraft/world/item/ShearsItem/interactLivingEntity(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult; from net/minecraft/world/item/Item/interactLivingEntity(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;: interactLivingEntity -> m_6880_
 Adding extras
@@ -142,6 +146,9 @@ Writing Output: /home/runner/workspace/build/reobfJar/output.jar
   com/durabilityhud/
   com/durabilityhud/DurabilityHudMod.class
   com/durabilityhud/client/
+  com/durabilityhud/client/ConfigScreen$1.class
+  com/durabilityhud/client/ConfigScreen$ConfigPage.class
+  com/durabilityhud/client/ConfigScreen$DraggableButton.class
   com/durabilityhud/client/ConfigScreen.class
   com/durabilityhud/client/HudRenderer$1.class
   com/durabilityhud/client/HudRenderer.class

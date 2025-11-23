@@ -4,6 +4,8 @@ import com.durabilityhud.config.ModConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
@@ -34,10 +36,16 @@ public class HudRenderer {
         ItemStack blockExample = ItemStack.EMPTY;
         
         addPlayerItems(mc, itemsToRender);
-        blockCount = countBlocks(mc);
-        blockExample = getFirstBlock(mc);
         
-        if (itemsToRender.isEmpty() && blockCount == 0) return;
+        // Check if holding a block in main hand
+        ItemStack heldItem = mc.player.getMainHandItem();
+        if (!heldItem.isEmpty() && heldItem.getItem() instanceof BlockItem) {
+            blockExample = heldItem;
+            blockCount = countMatchingBlocks(mc, heldItem);
+        }
+        
+        boolean hasPinnedBlocks = ModConfig.PINNED_BLOCKS_ENABLED.get() && !ModConfig.PINNED_BLOCKS_LIST.get().isEmpty();
+        if (itemsToRender.isEmpty() && blockCount == 0 && !hasPinnedBlocks) return;
         
         int x = ModConfig.HUD_X.get();
         int y = ModConfig.HUD_Y.get();
@@ -62,27 +70,111 @@ public class HudRenderer {
         
         guiGraphics.pose().popPose();
         RenderSystem.disableBlend();
+        
+        renderPinnedBlocks(guiGraphics, mc);
+    }
+    
+    private static void renderPinnedBlocks(GuiGraphics guiGraphics, Minecraft mc) {
+        if (!ModConfig.PINNED_BLOCKS_ENABLED.get()) return;
+        
+        List<? extends String> pinnedBlocks = ModConfig.PINNED_BLOCKS_LIST.get();
+        if (pinnedBlocks.isEmpty()) return;
+        
+        int x = ModConfig.PINNED_BLOCKS_X.get();
+        int y = ModConfig.PINNED_BLOCKS_Y.get();
+        float scale = ModConfig.HUD_SCALE.get().floatValue();
+        
+        RenderSystem.enableBlend();
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(x, y, 0);
+        guiGraphics.pose().scale(scale, scale, 1.0f);
+        
+        int offsetY = 0;
+        
+        for (String blockId : pinnedBlocks) {
+            try {
+                ResourceLocation location = new ResourceLocation(blockId);
+                Item item = BuiltInRegistries.ITEM.get(location);
+                
+                if (item != Items.AIR && item instanceof BlockItem) {
+                    ItemStack stack = new ItemStack(item);
+                    int count = countMatchingBlocks(mc, stack);
+                    
+                    renderBlockGroup(guiGraphics, mc, stack, count, 0, offsetY);
+                    offsetY += 20;
+                }
+            } catch (Exception e) {
+            }
+        }
+        
+        guiGraphics.pose().popPose();
+        RenderSystem.disableBlend();
     }
     
     private static void addPlayerItems(Minecraft mc, List<ItemStack> items) {
+        List<ItemStack> tempItems = new ArrayList<>();
+        
         ItemStack mainHand = mc.player.getMainHandItem();
         if (!mainHand.isEmpty() && mainHand.isDamageableItem() && shouldShowItem(mainHand)) {
-            items.add(mainHand);
+            tempItems.add(mainHand);
         }
         
         ItemStack offHand = mc.player.getOffhandItem();
         if (!offHand.isEmpty() && offHand.isDamageableItem() && shouldShowItem(offHand) && !ItemStack.matches(mainHand, offHand)) {
-            items.add(offHand);
+            tempItems.add(offHand);
         }
         
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() == EquipmentSlot.Type.ARMOR) {
                 ItemStack armorPiece = mc.player.getItemBySlot(slot);
                 if (!armorPiece.isEmpty() && armorPiece.isDamageableItem() && shouldShowItem(armorPiece)) {
-                    items.add(armorPiece);
+                    tempItems.add(armorPiece);
                 }
             }
         }
+        
+        tempItems.sort((a, b) -> {
+            int orderA = getItemOrder(a);
+            int orderB = getItemOrder(b);
+            return Integer.compare(orderA, orderB);
+        });
+        
+        items.addAll(tempItems);
+    }
+    
+    private static int getItemOrder(ItemStack stack) {
+        Item item = stack.getItem();
+        String itemType = getItemType(item);
+        
+        var orderList = new ArrayList<String>(ModConfig.ITEM_ORDER.get());
+        int index = orderList.indexOf(itemType);
+        return index == -1 ? 9999 : index;
+    }
+    
+    private static String getItemType(Item item) {
+        if (item instanceof SwordItem) return "sword";
+        if (item instanceof PickaxeItem) return "pickaxe";
+        if (item instanceof AxeItem) return "axe";
+        if (item instanceof ShovelItem) return "shovel";
+        if (item instanceof HoeItem) return "hoe";
+        if (item instanceof ArmorItem armor) {
+            return switch (armor.getType()) {
+                case HELMET -> "helmet";
+                case CHESTPLATE -> "chestplate";
+                case LEGGINGS -> "leggings";
+                case BOOTS -> "boots";
+                default -> "unknown";
+            };
+        }
+        if (item instanceof ShieldItem) return "shield";
+        if (item instanceof ElytraItem) return "elytra";
+        if (item instanceof BowItem) return "bow";
+        if (item instanceof CrossbowItem) return "crossbow";
+        if (item instanceof TridentItem) return "trident";
+        if (item instanceof FishingRodItem) return "fishing_rod";
+        if (item instanceof ShearsItem) return "shears";
+        
+        return "unknown";
     }
     
     private static boolean shouldShowItem(ItemStack stack) {
@@ -113,25 +205,15 @@ public class HudRenderer {
         return true;
     }
     
-    private static int countBlocks(Minecraft mc) {
+    private static int countMatchingBlocks(Minecraft mc, ItemStack targetBlock) {
         int count = 0;
         for (int i = 0; i < mc.player.getInventory().getContainerSize(); i++) {
             ItemStack stack = mc.player.getInventory().getItem(i);
-            if (!stack.isEmpty() && stack.getItem() instanceof BlockItem) {
+            if (!stack.isEmpty() && ItemStack.isSameItemSameTags(stack, targetBlock)) {
                 count += stack.getCount();
             }
         }
         return count;
-    }
-    
-    private static ItemStack getFirstBlock(Minecraft mc) {
-        for (int i = 0; i < mc.player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = mc.player.getInventory().getItem(i);
-            if (!stack.isEmpty() && stack.getItem() instanceof BlockItem) {
-                return stack;
-            }
-        }
-        return ItemStack.EMPTY;
     }
     
     private static void renderBlockGroup(GuiGraphics guiGraphics, Minecraft mc, ItemStack exampleBlock, int totalCount, int x, int y) {
