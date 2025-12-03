@@ -1,17 +1,18 @@
-# Durability HUD - Minecraft Forge 1.20.1 Modu
+# Durability HUD - Minecraft Fabric 1.20.1 Modu
 
-Bu mod, Minecraft 1.20.1 için hazırlanmış bir Forge modudur. Elinizde ve üzerinizde bulunan itemlerin dayanıklılığını (durability) HUD olarak gösterir.
+Bu mod, Minecraft 1.20.1 için hazırlanmış bir Fabric modudur. Elinizde ve üzerinizde bulunan itemlerin dayanıklılığını (durability) HUD olarak gösterir.
 
 ## Özellikler
 
-- ✅ **Item Icon ve Durability Gösterme**: Tüm dayanıklılığı olan itemlerin icon ve durability değerini gösterir
-- ✅ **Özelleştirilebilir Konum**: HUD'ın X ve Y pozisyonunu ayarlayabilirsiniz
-- ✅ **Boyut Ayarlama**: HUD boyutunu 0.1x ile 5.0x arasında ayarlayabilirsiniz
-- ✅ **Item Bazlı Açma/Kapama**: Her item türünü (kılıç, kazma, zırh parçaları vb.) ayrı ayrı gösterebilir veya gizleyebilirsiniz
-- ✅ **Y Tuşu ile Ayar Menüsü**: Oyun içinde Y tuşuna basarak ayarları değiştirebilirsiniz
-- ✅ **Renk Kodlaması**: Durability değerine göre yeşil, sarı, kırmızı renk gösterir
+- **Item Icon ve Durability Gösterme**: Tüm dayanıklılığı olan itemlerin icon ve durability değerini gösterir
+- **Özelleştirilebilir Konum**: HUD'ın X ve Y pozisyonunu ayarlayabilirsiniz
+- **Boyut Ayarlama**: HUD boyutunu 0.1x ile 5.0x arasında ayarlayabilirsiniz
+- **Item Bazlı Açma/Kapama**: Her item türünü (kılıç, kazma, zırh parçaları vb.) ayrı ayrı gösterebilir veya gizleyebilirsiniz
+- **Y Tuşu ile Ayar Menüsü**: Oyun içinde Y tuşuna basarak ayarları değiştirebilirsiniz
+- **Renk Kodlaması**: Durability değerine göre yeşil, sarı, kırmızı renk gösterir
+- **Sabitlenmiş Bloklar**: Belirli blokların envanterinizdeki sayısını takip edin
 
-## Desteklenen İtemler
+## Desteklenen Itemler
 
 - Kılıç, Kazma, Balta, Kürek, Çapa
 - Miğfer, Göğüslük, Pantolon, Çizme
@@ -23,32 +24,37 @@ Bu mod, Minecraft 1.20.1 için hazırlanmış bir Forge modudur. Elinizde ve üz
 
 ### Gereksinimler
 - Minecraft Java Edition 1.20.1
-- Minecraft Forge 47.3.0 veya daha yenisi
+- Fabric Loader 0.15.3 veya daha yenisi
+- Fabric API 0.91.0+
 - Java 17 veya üzeri
 
 ### Adımlar
 
-1. **Forge Kurulumu**:
-   - [Forge İndirme Sayfası](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.20.1.html) adresinden Forge 1.20.1'i indirin
-   - Installer'ı çalıştırın ve "Install client" seçeneğini seçin
+1. **Fabric Kurulumu**:
+   - [Fabric İndirme Sayfası](https://fabricmc.net/use/installer/) adresinden Fabric Installer'ı indirin
+   - Installer'ı çalıştırın ve Minecraft 1.20.1'i seçin
 
-2. **Modu Derleyin**:
+2. **Fabric API'yi İndirin**:
+   - [Fabric API](https://modrinth.com/mod/fabric-api) sayfasından 1.20.1 versiyonunu indirin
+   - JAR dosyasını `.minecraft/mods/` klasörüne kopyalayın
+
+3. **Modu Derleyin**:
    ```bash
    ./gradlew build
    ```
    
-3. **JAR Dosyasını Alın**:
-   - Build işlemi tamamlandığında `build/libs/` klasöründe `DurabilityHud-1.0.0.jar` dosyasını bulacaksınız
+4. **JAR Dosyasını Alın**:
+   - Build işlemi tamamlandığında `build/libs/` klasöründe `durabilityhud-1.0.0.jar` dosyasını bulacaksınız
 
-4. **Modu Yükleyin**:
+5. **Modu Yükleyin**:
    - JAR dosyasını `.minecraft/mods/` klasörüne kopyalayın
    - Windows: `%APPDATA%\.minecraft\mods\`
    - macOS: `~/Library/Application Support/minecraft/mods/`
    - Linux: `~/.minecraft/mods/`
 
-5. **Minecraft'ı Başlatın**:
+6. **Minecraft'ı Başlatın**:
    - Minecraft Launcher'ı açın
-   - Forge 1.20.1 profilini seçin
+   - Fabric 1.20.1 profilini seçin
    - Oyunu başlatın
 
 ## Kullanım
@@ -64,12 +70,16 @@ Oyun içindeyken **Y** tuşuna basın.
 - **Y Pozisyon**: HUD'ın ekranın üstünden uzaklığı (piksel)
 - **Boyut**: HUD'ın ölçeği (0.1 - 5.0)
 
-**İtem Ayarları**:
+**Sabit Bloklar**:
+- Belirli blokları sabitleyerek envanterinizdeki sayılarını takip edin
+- Elde tutulan bir bloğu sabitleyebilirsiniz
+
+**Item Ayarları**:
 Her item türü için ayrı ayrı göster/gizle seçeneği bulunur.
 
 ### Config Dosyası
 
-Mod ayarları `config/durabilityhud-client.toml` dosyasında saklanır. Bu dosyayı manuel olarak da düzenleyebilirsiniz.
+Mod ayarları `config/durabilityhud.json` dosyasında saklanır. Bu dosyayı manuel olarak da düzenleyebilirsiniz.
 
 ## Geliştirme
 
@@ -77,42 +87,27 @@ Mod ayarları `config/durabilityhud-client.toml` dosyasında saklanır. Bu dosya
 - Java Development Kit (JDK) 17 veya üzeri
 - IntelliJ IDEA (önerilen) veya Eclipse
 
-### Projeyi Açma
+### Projeyi Derleme
 
-1. **Gradle Build**:
-   ```bash
-   ./gradlew build
-   ```
-
-2. **IntelliJ IDEA için**:
-   ```bash
-   ./gradlew genIntellijRuns
-   ```
-   Sonra IntelliJ IDEA'da "Open" ile projeyi açın.
-
-3. **Eclipse için**:
-   ```bash
-   ./gradlew genEclipseRuns
-   ```
-   Sonra Eclipse'de "Import Existing Gradle Project" yapın.
-
-### Oyunu Çalıştırma
-
-IntelliJ IDEA veya Eclipse'de:
-- **runClient**: Minecraft client'ı mod ile başlatır
-- **runServer**: Minecraft server'ı mod ile başlatır
+```bash
+./gradlew build
+```
 
 ### Proje Yapısı
 
 ```
-src/main/java/com/durabilityhud/
-├── DurabilityHudMod.java          # Ana mod sınıfı
-├── config/
-│   └── ModConfig.java             # Konfigürasyon yönetimi
-└── client/
-    ├── HudRenderer.java           # HUD render mantığı
-    ├── KeyBindings.java           # Tuş tanımlamaları
-    └── ConfigScreen.java          # Ayar ekranı GUI
+src/
+├── client/java/com/durabilityhud/
+│   ├── client/
+│   │   ├── DurabilityHudClient.java  # Ana mod giriş noktası
+│   │   ├── HudRenderer.java          # HUD çizim işlemleri
+│   │   ├── KeyBindings.java          # Tuş atamaları
+│   │   └── ConfigScreen.java         # Ayar ekranı
+│   └── config/
+│       └── ModConfig.java            # Yapılandırma sistemi
+└── main/resources/
+    ├── fabric.mod.json               # Mod metadata
+    └── assets/durabilityhud/lang/    # Dil dosyaları
 ```
 
 ## Lisans
@@ -122,15 +117,16 @@ MIT License - Projeyi serbestçe kullanabilir, değiştirebilir ve dağıtabilir
 ## Destek
 
 Herhangi bir sorun veya öneri için:
-1. Önce `config/durabilityhud-client.toml` dosyasını kontrol edin
+1. Önce `config/durabilityhud.json` dosyasını kontrol edin
 2. Minecraft loglarını kontrol edin (`logs/latest.log`)
-3. Forge versiyonunuzun 47.3.0 veya üzeri olduğundan emin olun
+3. Fabric Loader ve Fabric API versiyonlarınızın güncel olduğundan emin olun
 
 ## Changelog
 
 ### v1.0.0
-- İlk sürüm
+- Fabric 1.20.1'e dönüştürüldü
 - Item icon ve durability HUD
 - Özelleştirilebilir konum ve boyut
 - Item bazlı göster/gizle
+- Sabitlenmiş blok takibi
 - Y tuşu ile ayar menüsü

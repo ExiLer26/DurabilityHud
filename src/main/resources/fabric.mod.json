@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "durabilityhud",
+  "version": "${version}",
+  "name": "Durability HUD",
+  "description": "Ekranda silah, zirh dayanikliligi ve blok sayisi gosteren bir mod.",
+  "authors": [
+    "Replit AI"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.durabilityhud.client.DurabilityHudClient"
+    ]
+  },
+  "mixins": [],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  }
+}
