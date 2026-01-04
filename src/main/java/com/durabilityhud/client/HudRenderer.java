@@ -37,6 +37,18 @@ public class HudRenderer {
         
         addPlayerItems(mc, itemsToRender);
         
+        // Add held items that are not already covered (tools/armor)
+        if (ModConfig.SHOW_HELD_ITEMS.get()) {
+            ItemStack mainHand = mc.player.getMainHandItem();
+            if (!mainHand.isEmpty() && !(mainHand.getItem() instanceof BlockItem) && !isAlreadyAdded(itemsToRender, mainHand)) {
+                itemsToRender.add(mainHand);
+            }
+            ItemStack offHand = mc.player.getOffhandItem();
+            if (!offHand.isEmpty() && !(offHand.getItem() instanceof BlockItem) && !isAlreadyAdded(itemsToRender, offHand)) {
+                itemsToRender.add(offHand);
+            }
+        }
+        
         // Check if holding a block in main hand
         ItemStack heldItem = mc.player.getMainHandItem();
         if (!heldItem.isEmpty() && heldItem.getItem() instanceof BlockItem) {
@@ -111,6 +123,13 @@ public class HudRenderer {
         RenderSystem.disableBlend();
     }
     
+    private static boolean isAlreadyAdded(List<ItemStack> items, ItemStack stack) {
+        for (ItemStack s : items) {
+            if (ItemStack.matches(s, stack)) return true;
+        }
+        return false;
+    }
+
     private static void addPlayerItems(Minecraft mc, List<ItemStack> items) {
         List<ItemStack> tempItems = new ArrayList<>();
         
@@ -218,6 +237,7 @@ public class HudRenderer {
     
     private static void renderBlockGroup(GuiGraphics guiGraphics, Minecraft mc, ItemStack exampleBlock, int totalCount, int x, int y) {
         guiGraphics.renderItem(exampleBlock, x, y);
+        // Don't render default item decorations to avoid showing the stack count on the icon
         
         String countText = "x" + totalCount;
         
@@ -230,29 +250,72 @@ public class HudRenderer {
     
     private static void renderItemWithDurability(GuiGraphics guiGraphics, Minecraft mc, ItemStack stack, int x, int y) {
         guiGraphics.renderItem(stack, x, y);
-        guiGraphics.renderItemDecorations(mc.font, stack, x, y);
+        // Remove count decoration from the item icon itself to avoid double counting
+        renderItemDecorationsWithoutCount(guiGraphics, mc, stack, x, y);
         
-        int maxDamage = stack.getMaxDamage();
-        int damage = stack.getDamageValue();
-        int durability = maxDamage - damage;
-        
-        float durabilityPercent = (float) durability / maxDamage;
-        int barColor;
-        if (durabilityPercent > 0.66f) {
-            barColor = 0xFF00FF00;
-        } else if (durabilityPercent > 0.33f) {
-            barColor = 0xFFFFFF00;
+        if (stack.isDamageableItem()) {
+            int maxDamage = stack.getMaxDamage();
+            int damage = stack.getDamageValue();
+            int durability = maxDamage - damage;
+            
+            float durabilityPercent = (float) durability / maxDamage;
+            int barColor;
+            if (durabilityPercent > 0.66f) {
+                barColor = 0xFF00FF00;
+            } else if (durabilityPercent > 0.33f) {
+                barColor = 0xFFFFFF00;
+            } else {
+                barColor = 0xFFFF0000;
+            }
+            
+            String durabilityText = durability + "/" + maxDamage;
+            
+            int textX = x + 20;
+            int textY = y + 4;
+            
+            guiGraphics.fill(textX - 1, textY - 1, textX + mc.font.width(durabilityText) + 1, textY + 9, 0x80000000);
+            
+            guiGraphics.drawString(mc.font, durabilityText, textX, textY, barColor, false);
+        } else if (stack.getCount() > 1) {
+            int totalCount = countMatchingItems(mc, stack);
+            String countText = "x" + totalCount;
+            
+            int textX = x + 20;
+            int textY = y + 4;
+            
+            guiGraphics.fill(textX - 1, textY - 1, textX + mc.font.width(countText) + 1, textY + 9, 0x80000000);
+            guiGraphics.drawString(mc.font, countText, textX, textY, 0xFFFFFFFF, false);
         } else {
-            barColor = 0xFFFF0000;
+            // Check if it's a single item that might have more in inventory
+            int totalCount = countMatchingItems(mc, stack);
+            if (totalCount > 1) {
+                String countText = "x" + totalCount;
+                int textX = x + 20;
+                int textY = y + 4;
+                guiGraphics.fill(textX - 1, textY - 1, textX + mc.font.width(countText) + 1, textY + 9, 0x80000000);
+                guiGraphics.drawString(mc.font, countText, textX, textY, 0xFFFFFFFF, false);
+            }
         }
+    }
+
+    private static void renderItemDecorationsWithoutCount(GuiGraphics guiGraphics, Minecraft mc, ItemStack stack, int x, int y) {
+        if (stack.isEmpty()) return;
         
-        String durabilityText = durability + "/" + maxDamage;
-        
-        int textX = x + 20;
-        int textY = y + 4;
-        
-        guiGraphics.fill(textX - 1, textY - 1, textX + mc.font.width(durabilityText) + 1, textY + 9, 0x80000000);
-        
-        guiGraphics.drawString(mc.font, durabilityText, textX, textY, barColor, false);
+        if (stack.isItemEnabled(mc.level.enabledFeatures()) && (stack.isDamageableItem() || stack.isEnchanted())) {
+            // We only want to render things like the durability bar and glint, but Minecraft's renderItemDecorations 
+            // usually includes the count. We can call it with an empty string for the count.
+            guiGraphics.renderItemDecorations(mc.font, stack, x, y, "");
+        }
+    }
+
+    private static int countMatchingItems(Minecraft mc, ItemStack target) {
+        int count = 0;
+        for (int i = 0; i < mc.player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = mc.player.getInventory().getItem(i);
+            if (!stack.isEmpty() && ItemStack.isSameItemSameTags(stack, target)) {
+                count += stack.getCount();
+            }
+        }
+        return count;
     }
 }

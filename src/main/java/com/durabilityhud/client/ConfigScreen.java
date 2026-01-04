@@ -1,14 +1,13 @@
 package com.durabilityhud.client;
 
 import com.durabilityhud.config.ModConfig;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ConfigScreen extends Screen {
     private final Screen parent;
@@ -150,8 +149,52 @@ public class ConfigScreen extends Screen {
         ).bounds(centerX + buttonWidth / 2 + 2, y, buttonWidth / 2 - 2, 20).build());
     }
 
+
     private void initDurabilityPage() {
+        int y = 40;
+        int buttonWidth = 200;
+        int centerX = this.width / 2 - buttonWidth / 2;
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Hepsini Göster"),
+            button -> {
+                setAllToggles(true);
+                this.rebuildWidgets();
+            }
+        ).bounds(centerX, y, buttonWidth / 2 - 2, 20).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Hepsini Gizle"),
+            button -> {
+                setAllToggles(false);
+                this.rebuildWidgets();
+            }
+        ).bounds(centerX + buttonWidth / 2 + 2, y, buttonWidth / 2 - 2, 20).build());
+
+        y += 30;
         rebuildDurabilityButtons();
+    }
+
+    private void setAllToggles(boolean value) {
+        ModConfig.SHOW_BLOCKS.set(value);
+        ModConfig.SHOW_SWORD.set(value);
+        ModConfig.SHOW_PICKAXE.set(value);
+        ModConfig.SHOW_AXE.set(value);
+        ModConfig.SHOW_SHOVEL.set(value);
+        ModConfig.SHOW_HOE.set(value);
+        ModConfig.SHOW_HELMET.set(value);
+        ModConfig.SHOW_CHESTPLATE.set(value);
+        ModConfig.SHOW_LEGGINGS.set(value);
+        ModConfig.SHOW_BOOTS.set(value);
+        ModConfig.SHOW_SHIELD.set(value);
+        ModConfig.SHOW_ELYTRA.set(value);
+        ModConfig.SHOW_BOW.set(value);
+        ModConfig.SHOW_CROSSBOW.set(value);
+        ModConfig.SHOW_TRIDENT.set(value);
+        ModConfig.SHOW_FISHING_ROD.set(value);
+        ModConfig.SHOW_SHEARS.set(value);
+        ModConfig.SHOW_HELD_ITEMS.set(value);
+        ModConfig.save();
     }
 
     private void initPinnedBlocksPage() {
@@ -262,23 +305,84 @@ public class ConfigScreen extends Screen {
         this.rebuildWidgets();
     }
 
-    private void addItemToggle(String label, net.minecraftforge.common.ForgeConfigSpec.BooleanValue config, int x, int y) {
-        this.addRenderableWidget(Button.builder(
-            Component.literal(label + ": " + (config.get() ? "GÖSTER" : "GİZLE")),
-            button -> {
-                config.set(!config.get());
-                ModConfig.save();
-                button.setMessage(Component.literal(label + ": " + (config.get() ? "GÖSTER" : "GİZLE")));
-            }
-        ).bounds(x, y, 200, 20).build());
+    private void rebuildDurabilityButtons() {
+        int y = 70; // Start below the all/none buttons
+        int itemButtonWidth = 200;
+        int centerX = this.width / 2 - itemButtonWidth / 2;
+
+        var orderList = new ArrayList<String>(ModConfig.ITEM_ORDER.get());
+        var posX = new ArrayList<>(ModConfig.ITEM_POS_X.get());
+        var posY = new ArrayList<>(ModConfig.ITEM_POS_Y.get());
+        while (posX.size() < orderList.size()) posX.add(0);
+        while (posY.size() < orderList.size()) posY.add(0);
+
+        for (int i = 0; i < orderList.size(); i++) {
+            String itemKey = orderList.get(i);
+            int px = posX.get(i);
+            int py = posY.get(i);
+            int useX = (px != 0) ? px : centerX;
+            int useY = (py != 0) ? py : y;
+            addDraggableItemToggle(itemKey, i, useX, useY);
+            y += 25;
+        }
+    }
+
+    private void addDraggableItemToggle(String itemKey, int index, int x, int y) {
+        Map<String, String> labels = new HashMap<>();
+        labels.put("blocks", "Bloklar (Elde Tutulan)");
+        labels.put("ingots", "Külçeler");
+        labels.put("sword", "Kılıç");
+        labels.put("pickaxe", "Kazma");
+        labels.put("axe", "Balta");
+        labels.put("shovel", "Kürek");
+        labels.put("hoe", "Çapa");
+        labels.put("helmet", "Miğfer");
+        labels.put("chestplate", "Göğüslük");
+        labels.put("leggings", "Pantolon");
+        labels.put("boots", "Çizme");
+        labels.put("shield", "Kalkan");
+        labels.put("elytra", "Elytra");
+        labels.put("bow", "Yay");
+        labels.put("crossbow", "Tatar Yayı");
+        labels.put("trident", "Üç Dişli Mızrak");
+        labels.put("fishing_rod", "Olta");
+        labels.put("shears", "Makas");
+        labels.put("held_items", "Elde Tutulanlar");
+
+        Map<String, net.minecraftforge.common.ForgeConfigSpec.BooleanValue> configs = new HashMap<>();
+        configs.put("blocks", ModConfig.SHOW_BLOCKS);
+        configs.put("sword", ModConfig.SHOW_SWORD);
+        configs.put("pickaxe", ModConfig.SHOW_PICKAXE);
+        configs.put("axe", ModConfig.SHOW_AXE);
+        configs.put("shovel", ModConfig.SHOW_SHOVEL);
+        configs.put("hoe", ModConfig.SHOW_HOE);
+        configs.put("helmet", ModConfig.SHOW_HELMET);
+        configs.put("chestplate", ModConfig.SHOW_CHESTPLATE);
+        configs.put("leggings", ModConfig.SHOW_LEGGINGS);
+        configs.put("boots", ModConfig.SHOW_BOOTS);
+        configs.put("shield", ModConfig.SHOW_SHIELD);
+        configs.put("elytra", ModConfig.SHOW_ELYTRA);
+        configs.put("bow", ModConfig.SHOW_BOW);
+        configs.put("crossbow", ModConfig.SHOW_CROSSBOW);
+        configs.put("trident", ModConfig.SHOW_TRIDENT);
+        configs.put("fishing_rod", ModConfig.SHOW_FISHING_ROD);
+        configs.put("shears", ModConfig.SHOW_SHEARS);
+        configs.put("held_items", ModConfig.SHOW_HELD_ITEMS);
+
+        String label = labels.getOrDefault(itemKey, itemKey);
+        var config = configs.get(itemKey);
+
+        if (config != null) {
+            DraggableButton button = new DraggableButton(x, y, 200, 20, label, config, index);
+            button.setPosition(x, y);
+            this.addRenderableWidget(button);
+        }
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics);
-
         guiGraphics.drawCenteredString(this.font, currentPage.getTitle(), this.width / 2, 15, 0xFFFFFF);
-
         super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
@@ -318,11 +422,9 @@ public class ConfigScreen extends Screen {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (draggingButton != null) {
-            // Save position for the dragged item (by its start index)
             int newX = draggingButton.getX();
             int newY = draggingButton.getY();
 
-            // ensure lists exist and are big enough
             var posX = new ArrayList<>(ModConfig.ITEM_POS_X.get());
             var posY = new ArrayList<>(ModConfig.ITEM_POS_Y.get());
             var orderList = new ArrayList<>(ModConfig.ITEM_ORDER.get());
@@ -358,29 +460,21 @@ public class ConfigScreen extends Screen {
                 boolean found = false;
                 for (DraggableButton btn : allButtons) {
                     int btnCenterY = btn.getY() + btn.getHeight() / 2;
-
                     if (dragCenterY < btnCenterY) {
                         targetIndex = btn.originalIndex;
-                        if (targetIndex > dragStartIndex) {
-                            targetIndex--;
-                        }
+                        if (targetIndex > dragStartIndex) targetIndex--;
                         found = true;
                         break;
                     }
                 }
-
-                if (!found) {
-                    targetIndex = orderList.size() - 1;
-                }
+                if (!found) targetIndex = orderList.size() - 1;
             }
 
-            if (targetIndex != dragStartIndex) {
-                reorderItems(dragStartIndex, targetIndex);
-            }
+            if (targetIndex != dragStartIndex) reorderItems(dragStartIndex, targetIndex);
 
             draggingButton = null;
             dragStartIndex = -1;
-            rebuildDurabilityButtons();
+            rebuildWidgets();
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
@@ -393,120 +487,19 @@ public class ConfigScreen extends Screen {
             orderList.add(toIndex, item);
             ModConfig.ITEM_ORDER.set(orderList);
 
-            // Also reorder saved positions to match same movement
             var posX = new ArrayList<>(ModConfig.ITEM_POS_X.get());
             var posY = new ArrayList<>(ModConfig.ITEM_POS_Y.get());
             while (posX.size() < orderList.size()) posX.add(0);
             while (posY.size() < orderList.size()) posY.add(0);
 
-            // move values in pos lists
-            int size = orderList.size();
-            if (fromIndex >= 0 && fromIndex < size && toIndex >= 0 && toIndex < size) {
-                int vx = posX.remove(fromIndex);
-                int vy = posY.remove(fromIndex);
-                posX.add(toIndex, vx);
-                posY.add(toIndex, vy);
-            }
+            int vx = posX.remove(fromIndex);
+            int vy = posY.remove(fromIndex);
+            posX.add(toIndex, vx);
+            posY.add(toIndex, vy);
 
             ModConfig.ITEM_POS_X.set(posX);
             ModConfig.ITEM_POS_Y.set(posY);
             ModConfig.save();
-        }
-    }
-
-    private void rebuildDurabilityButtons() {
-        this.clearWidgets();
-
-        int buttonWidth = 80;
-        int spacing = 5;
-        int totalWidth = (buttonWidth * 3) + (spacing * 2);
-        int startX = (this.width - totalWidth) / 2;
-        int tabY = this.height - 30;
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal(ConfigPage.MAIN.getTitle()),
-            button -> switchPage(ConfigPage.MAIN)
-        ).bounds(startX, tabY, buttonWidth, 20).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal(ConfigPage.DURABILITY.getTitle()),
-            button -> switchPage(ConfigPage.DURABILITY)
-        ).bounds(startX + buttonWidth + spacing, tabY, buttonWidth, 20).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal(ConfigPage.PINNED_BLOCKS.getTitle()),
-            button -> switchPage(ConfigPage.PINNED_BLOCKS)
-        ).bounds(startX + (buttonWidth + spacing) * 2, tabY, buttonWidth, 20).build());
-
-        int y = 40;
-        int itemButtonWidth = 200;
-        int centerX = this.width / 2 - itemButtonWidth / 2;
-
-        var orderList = new ArrayList<String>(ModConfig.ITEM_ORDER.get());
-        var posX = new ArrayList<>(ModConfig.ITEM_POS_X.get());
-        var posY = new ArrayList<>(ModConfig.ITEM_POS_Y.get());
-        while (posX.size() < orderList.size()) posX.add(0);
-        while (posY.size() < orderList.size()) posY.add(0);
-
-        for (int i = 0; i < orderList.size(); i++) {
-            String itemKey = orderList.get(i);
-            int px = posX.get(i);
-            int py = posY.get(i);
-            // if no saved position, fallback to vertical list position
-            int useX = (px != 0) ? px : centerX;
-            int useY = (py != 0) ? py : y;
-            addDraggableItemToggle(itemKey, i, useX, useY);
-            y += 25;
-        }
-    }
-
-    private void addDraggableItemToggle(String itemKey, int index, int x, int y) {
-        Map<String, String> labels = new HashMap<>();
-        labels.put("blocks", "Bloklar (Elde Tutulan)");
-        labels.put("sword", "Kılıç");
-        labels.put("pickaxe", "Kazma");
-        labels.put("axe", "Balta");
-        labels.put("shovel", "Kürek");
-        labels.put("hoe", "Çapa");
-        labels.put("helmet", "Miğfer");
-        labels.put("chestplate", "Göğüslük");
-        labels.put("leggings", "Pantolon");
-        labels.put("boots", "Çizme");
-        labels.put("shield", "Kalkan");
-        labels.put("elytra", "Elytra");
-        labels.put("bow", "Yay");
-        labels.put("crossbow", "Tatar Yayı");
-        labels.put("trident", "Üç Dişli Mızrak");
-        labels.put("fishing_rod", "Olta");
-        labels.put("shears", "Makas");
-
-        Map<String, net.minecraftforge.common.ForgeConfigSpec.BooleanValue> configs = new HashMap<>();
-        configs.put("blocks", ModConfig.SHOW_BLOCKS);
-        configs.put("sword", ModConfig.SHOW_SWORD);
-        configs.put("pickaxe", ModConfig.SHOW_PICKAXE);
-        configs.put("axe", ModConfig.SHOW_AXE);
-        configs.put("shovel", ModConfig.SHOW_SHOVEL);
-        configs.put("hoe", ModConfig.SHOW_HOE);
-        configs.put("helmet", ModConfig.SHOW_HELMET);
-        configs.put("chestplate", ModConfig.SHOW_CHESTPLATE);
-        configs.put("leggings", ModConfig.SHOW_LEGGINGS);
-        configs.put("boots", ModConfig.SHOW_BOOTS);
-        configs.put("shield", ModConfig.SHOW_SHIELD);
-        configs.put("elytra", ModConfig.SHOW_ELYTRA);
-        configs.put("bow", ModConfig.SHOW_BOW);
-        configs.put("crossbow", ModConfig.SHOW_CROSSBOW);
-        configs.put("trident", ModConfig.SHOW_TRIDENT);
-        configs.put("fishing_rod", ModConfig.SHOW_FISHING_ROD);
-        configs.put("shears", ModConfig.SHOW_SHEARS);
-
-        String label = labels.getOrDefault(itemKey, itemKey);
-        var config = configs.get(itemKey);
-
-        if (config != null) {
-            DraggableButton button = new DraggableButton(x, y, 200, 20, label, config, index);
-            // ensure button is placed at saved position
-            button.setPosition(x, y);
-            this.addRenderableWidget(button);
         }
     }
 

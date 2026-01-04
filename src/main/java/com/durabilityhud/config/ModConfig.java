@@ -44,6 +44,7 @@ public class ModConfig {
     public static final ForgeConfigSpec.BooleanValue SHOW_TRIDENT;
     public static final ForgeConfigSpec.BooleanValue SHOW_FISHING_ROD;
     public static final ForgeConfigSpec.BooleanValue SHOW_SHEARS;
+    public static final ForgeConfigSpec.BooleanValue SHOW_HELD_ITEMS;
     public static ForgeConfigSpec.ConfigValue<List<Integer>> ITEM_POS_X;
     public static ForgeConfigSpec.ConfigValue<List<Integer>> ITEM_POS_Y;
 
@@ -93,7 +94,7 @@ public class ModConfig {
             .defineList("item_order", Arrays.asList(
                 "blocks", "sword", "pickaxe", "axe", "shovel", "hoe",
                 "helmet", "chestplate", "leggings", "boots", "shield",
-                "elytra", "bow", "crossbow", "trident", "fishing_rod", "shears"
+                "elytra", "bow", "crossbow", "trident", "fishing_rod", "shears", "held_items"
             ), obj -> obj instanceof String);
             
             ITEM_POS_X = BUILDER
@@ -124,6 +125,9 @@ public class ModConfig {
         SHOW_TRIDENT = BUILDER.define("show_trident", true);
         SHOW_FISHING_ROD = BUILDER.define("show_fishing_rod", true);
         SHOW_SHEARS = BUILDER.define("show_shears", true);
+        SHOW_HELD_ITEMS = BUILDER
+            .comment("Elde tutulan itemleri (alet/silah olmayan) HUD'da göster")
+            .define("show_held_items", true);
         
         BUILDER.pop();
         SPEC = BUILDER.build();

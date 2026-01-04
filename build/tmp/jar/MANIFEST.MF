@@ -5,5 +5,5 @@ Specification-Version: 1
 Implementation-Title: DurabilityHud
 Implementation-Version: 1.0.0
 Implementation-Vendor: Replit AI
-Implementation-Timestamp: 2025-11-23T20:25:41+0000
+Implementation-Timestamp: 2026-01-04T14:20:22+0000
 
