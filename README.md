@@ -18,6 +18,7 @@ Bu mod, Minecraft 1.20.1 için hazırlanmış bir Forge modudur. Elinizde ve üz
 - Kalkan, Elytra
 - Yay, Tatar Yayı, Üç Dişli Mızrak
 - Olta, Makas
+- Elde Tutulan Tüm itemler artık destekliyor
 
 ## Kurulum (Minecraft İçin)
 
