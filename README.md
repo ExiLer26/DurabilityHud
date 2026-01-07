@@ -19,7 +19,8 @@ Bu mod, Minecraft 1.20.1 için hazırlanmış bir Fabric modudur. Elinizde ve ü
 - Kalkan, Elytra
 - Yay, Tatar Yayı, Üç Dişli Mızrak
 - Olta, Makas
-
+- Elde Tutulan büttün itemler.
+- 
 ## Kurulum (Minecraft İçin)
 
 ### Gereksinimler

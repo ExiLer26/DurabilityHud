@@ -21,35 +21,21 @@ public class HudRenderer {
         if (mc.player == null || mc.options.hudHidden) return;
         
         List<ItemStack> itemsToRender = new ArrayList<>();
-        int blockCount = 0;
-        ItemStack blockExample = ItemStack.EMPTY;
-        
         addPlayerItems(mc, itemsToRender);
         
-        ItemStack heldItem = mc.player.getMainHandStack();
-        if (!heldItem.isEmpty() && heldItem.getItem() instanceof BlockItem) {
-            blockExample = heldItem;
-            blockCount = countMatchingBlocks(mc, heldItem);
-        }
-        
-        boolean hasPinnedBlocks = ModConfig.isPinnedBlocksEnabled() && !ModConfig.getPinnedBlocksList().isEmpty();
-        if (itemsToRender.isEmpty() && blockCount == 0 && !hasPinnedBlocks) return;
+        if (itemsToRender.isEmpty() && !ModConfig.isPinnedBlocksEnabled()) return;
         
         int x = ModConfig.getHudX();
         int y = ModConfig.getHudY();
         float scale = (float) ModConfig.getHudScale();
         
         RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         drawContext.getMatrices().push();
         drawContext.getMatrices().translate(x, y, 0);
         drawContext.getMatrices().scale(scale, scale, 1.0f);
         
         int offsetY = 0;
-        
-        if (ModConfig.isShowBlocks() && blockCount > 0 && !blockExample.isEmpty()) {
-            renderBlockGroup(drawContext, mc, blockExample, blockCount, 0, offsetY);
-            offsetY += 20;
-        }
         
         for (ItemStack stack : itemsToRender) {
             renderItemWithDurability(drawContext, mc, stack, 0, offsetY);
@@ -103,19 +89,19 @@ public class HudRenderer {
         List<ItemStack> tempItems = new ArrayList<>();
         
         ItemStack mainHand = mc.player.getMainHandStack();
-        if (!mainHand.isEmpty() && mainHand.isDamageable() && shouldShowItem(mainHand)) {
+        if (!mainHand.isEmpty() && shouldShowItem(mainHand)) {
             tempItems.add(mainHand);
         }
         
         ItemStack offHand = mc.player.getOffHandStack();
-        if (!offHand.isEmpty() && offHand.isDamageable() && shouldShowItem(offHand) && !ItemStack.areEqual(mainHand, offHand)) {
+        if (!offHand.isEmpty() && shouldShowItem(offHand) && !ItemStack.areEqual(mainHand, offHand)) {
             tempItems.add(offHand);
         }
         
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() == EquipmentSlot.Type.ARMOR) {
                 ItemStack armorPiece = mc.player.getEquippedStack(slot);
-                if (!armorPiece.isEmpty() && armorPiece.isDamageable() && shouldShowItem(armorPiece)) {
+                if (!armorPiece.isEmpty() && shouldShowItem(armorPiece)) {
                     tempItems.add(armorPiece);
                 }
             }
@@ -218,29 +204,37 @@ public class HudRenderer {
     
     private static void renderItemWithDurability(DrawContext drawContext, MinecraftClient mc, ItemStack stack, int x, int y) {
         drawContext.drawItem(stack, x, y);
-        drawContext.drawItemInSlot(mc.textRenderer, stack, x, y);
+        // Remove the default count/durability bar on top of the icon
+        // drawContext.drawItemInSlot(mc.textRenderer, stack, x, y);
         
-        int maxDamage = stack.getMaxDamage();
-        int damage = stack.getDamage();
-        int durability = maxDamage - damage;
-        
-        float durabilityPercent = (float) durability / maxDamage;
-        int barColor;
-        if (durabilityPercent > 0.66f) {
-            barColor = 0xFF00FF00;
-        } else if (durabilityPercent > 0.33f) {
-            barColor = 0xFFFFFF00;
+        String displayText = "";
+        int textColor = 0xFFFFFFFF;
+
+        if (stack.isDamageable()) {
+            int maxDamage = stack.getMaxDamage();
+            int damage = stack.getDamage();
+            int durability = maxDamage - damage;
+            
+            float durabilityPercent = (float) durability / maxDamage;
+            if (durabilityPercent > 0.66f) {
+                textColor = 0xFF00FF00;
+            } else if (durabilityPercent > 0.33f) {
+                textColor = 0xFFFFFF00;
+            } else {
+                textColor = 0xFFFF0000;
+            }
+            
+            displayText = durability + "/" + maxDamage;
         } else {
-            barColor = 0xFFFF0000;
+            int totalCount = countMatchingBlocks(mc, stack);
+            displayText = "x" + totalCount;
+            textColor = 0xFFFFFFFF;
         }
-        
-        String durabilityText = durability + "/" + maxDamage;
         
         int textX = x + 20;
         int textY = y + 4;
         
-        drawContext.fill(textX - 1, textY - 1, textX + mc.textRenderer.getWidth(durabilityText) + 1, textY + 9, 0x80000000);
-        
-        drawContext.drawText(mc.textRenderer, durabilityText, textX, textY, barColor, false);
+        drawContext.fill(textX - 1, textY - 1, textX + mc.textRenderer.getWidth(displayText) + 1, textY + 9, 0x80000000);
+        drawContext.drawText(mc.textRenderer, displayText, textX, textY, textColor, false);
     }
 }
